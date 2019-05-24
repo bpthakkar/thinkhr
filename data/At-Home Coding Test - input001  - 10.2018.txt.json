@@ -1,6 +1,13 @@
 {
   "enteries": [
     {
+      "firstname": "Cameron",
+      "lastname": "Kathy",
+      "zipcode": "14312",
+      "phonenumber": "613 658 9393",
+      "color": "red"
+    },
+    {
       "firstname": "Amy",
       "lastname": "Stevenson",
       "zipcode": "84880",
@@ -26,6 +33,6 @@
     1,
     2,
     3,
-    6
+    7
   ]
 }

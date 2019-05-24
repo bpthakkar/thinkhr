@@ -6,8 +6,8 @@ import json
 
 
 def line_validation(line):
-
-    # Valid patter can be added or deleted based on the requirement
+    # This function is to validate line based on acceptable patterns,
+    # Pattern can be added or removed depending on the acceptance criteria
     valid_patterns = \
         [r'^(\D*)(,\s)+([a-z|A-Z]*)(,\s)+[0-9]{5}(,\s)+\(?[0-9]{3}\)?(-|\s)[0-9]{3}(-|\s)[0-9]{4}(,\s)+([a-z|A-Z]*)$',
          r'^(\D*)(,\s)+([a-z|A-Z]*)(,\s)+[0-9]{5}(,\s)+([a-z|A-Z]*)(,\s)+\(?[0-9]{3}\)?(-|\s)[0-9]{3}(-|\s)[0-9]{4}$',
@@ -26,6 +26,10 @@ def line_validation(line):
 
 
 def line_parse(line):
+    # Function will parse the line and return the dictionary object
+    # Since there are 2 possible acceptable format for the first name and last name, added logic to handle that
+    # separately
+
     data = {
         'firstname':  '',
         'lastname': '',
@@ -36,7 +40,7 @@ def line_parse(line):
 
     fields = line.split(',')
 
-    # Assign approriate first name and last name
+    # Check for the field count fo find the first name and last name values correctly
     if len(fields) == 4:
         field = fields.pop(0)
         names = field.split()
@@ -46,20 +50,19 @@ def line_parse(line):
         data['firstname'] = fields.pop(0)
         data['lastname'] = fields.pop(0).strip()
 
+    # Assigning remaining fields value using regex since it can be in any order
     for count, field in enumerate(fields, 1):
         field = field.strip()
         if re.search('^[0-9]{5}', field):
             # print('Zip =', field)
             data['zipcode'] = field
         elif re.search(r'^\(?[0-9]{3}\)?(-|\s)[0-9]{3}(-|\s)[0-9]{4}', field):
-            # or re.search('',field)
             # print('Phone # =', field)
             data['phonenumber'] = field
         elif re.search(r'[a-z|A-Z]*',field):
             data['color'] = field
-            # print('Not Identified ', field)
 
-    print(data)
+    # print(data)
     return data
 
 
@@ -74,18 +77,19 @@ def main(argv):
         'errors': ''
     }
 
-    # parsing command line arguments
+    usage = 'USAGE: python pii_converter.py --in inputfile [--out outputfile] \n' \
+            'USAGE: python pii_converter.py inputfile [outputfile]'
+
+    # parsing command line arguments and validating the same
     try:
         opts, args = getopt.getopt(argv, 'h', ['in=', 'out='])
     except getopt.GetoptError:
-        print('USAGE: python pii.py --in <inputfile> [--out <outputfile>]')
-        print('USAGE: python pii.py <inputfile> [<outputfile>]')
+        print(usage)
         sys.exit()
 
-    # Get the command details if there are no flag used
+    # Get command argument if no flag used, Print the usage if there are no argument passed
     if not opts and not args:
-        print('USAGE: python pii.py --in <inputfile> [--out <outputfile>]')
-        print('USAGE: python pii.py <inputfile> [<outputfile>]')
+        print(usage)
         sys.exit()
     elif args and len(args) >= 2:
         inputfile = args[0]
@@ -96,15 +100,14 @@ def main(argv):
     # Get the commandline details using flag
     for opt, param in opts:
         if opt == '-h':
-            print('USAGE: python pii.py --in <inputfile> [--out <outputfile>]')
-            print('USAGE: python pii.py <inputfile> [<outputfile>]')
+            print(usage)
             sys.exit()
         elif opt == '--in':
             inputfile = param
         elif opt == '--out':
             outputfile = param
         else:
-            print('USAGE: python pii.py --in <inputfile> --out <outputfile>')
+            print(usage)
             sys.exit()
 
     # print('In file name', inputfile)
@@ -123,8 +126,10 @@ def main(argv):
             # print(index, ' => ', line)
             val = line_validation(line)
             if val:
+                print('VALID ==>> ', line)
                 entry_list.append(line_parse(line))
             else:
+                print('NOT VALID ==>> ', line)
                 error_list.append(index)
 
         infile_handler.close()
@@ -134,7 +139,8 @@ def main(argv):
         # print('SHORTED ', sorted(entry_list, key=lambda entry: entry['lastname']+', '+entry['firstname']))
         pii_json['errors'] = error_list
 
-        print('JSON ==== ', json.dumps(pii_json, indent=2))
+        print('Final formatted JSON data')
+        print(json.dumps(pii_json, indent=2))
 
         if outputfile == '':
             outputfile = inputfile + '.json'
