@@ -26,7 +26,7 @@ FirstName LastName, Purple, 14537, 713 905 0383
 (703)-711-0996 OR 713 905 0383
 ```
 4. zip code should only 5 digit. 9 digit zip code is not valid
-5. Confusion around following line if it should be valie or not due to conflict between example and doc
+5. Confusion around following line if it should be valid or not due to conflict between example shared and word document. I have currently consider this as valid line, however I have to comment out a regex rule to make it invalid.
 ```text
 LastName, FirstName, 12023, 636 121 1111, Yellow 
 ``` 
